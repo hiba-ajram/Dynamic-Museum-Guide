@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMG | Dynamic Museum Guide</title>
+    <!-- Import Google Model-Viewer for 3D/AR support -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --dark-bg: #0f172a;
+        }
+        body { 
+            background-color: var(--dark-bg); 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Style the 3D viewer container */
+        model-viewer {
+            width: 100%;
+            height: 45vh;
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            --poster-color: transparent;
+        }
+        /* Smooth transition for persona switching */
+        #content-area {
+            transition: opacity 0.3s ease;
+        }
+        /* Custom scrollbar for persona list */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- TOP NAVIGATION -->
+    <header class="p-4 flex justify-between items-center border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 p-1.5 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            </div>
+            <h1 class="font-bold tracking-tight text-lg">DMG <span class="text-blue-400">UNEARTHED</span></h1>
+        </div>
+        <div class="text-[10px] bg-slate-800 px-2 py-1 rounded-full border border-white/5 uppercase tracking-widest text-slate-400">Scan: Active</div>
+    </header>
+
+    <!-- 3D MODEL SECTION -->
+    <section class="relative">
+        <!-- FIXED: Path changed to ./fish.glb (assuming correct extension) -->
+        <model-viewer 
+            id="main-viewer"
+            src="./fish.glb" 
+            ios-src=""
+            alt="A 3D model of an archaeological artifact"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1"
+            class="touch-none">
+            
+            <!-- AR UI -->
+            <button slot="ar-button" class="absolute bottom-4 right-4 bg-white text-black px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg hover:bg-slate-200 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                VIEW IN AR
+            </button>
+        </model-viewer>
+    </section>
+
+    <!-- PERSONA SELECTION -->
+    <div class="bg-slate-900 p-4 border-t border-white/5">
+        <p class="text-[10px] uppercase font-bold text-slate-500 mb-3 tracking-widest">Select AI Guide Persona</p>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar">
+            <button onclick="updatePersona('explorer')" id="btn-explorer" class="persona-btn active flex-shrink-0 bg-blue-600 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2">
+                <span>🧒</span> Explorer
+            </button>
+            <button onclick="updatePersona('scientist')" id="btn-scientist" class="persona-btn flex-shrink-0 bg-slate-800 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-slate-700">
+                <span>🔬</span> Scientist
+            </button>
+            <button onclick="updatePersona('novelist')" id="btn-novelist" class="persona-btn flex-shrink-0 bg-slate-800 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-slate-700">
+                <span>✍️</span> Storyteller
+            </button>
+        </div>
+    </div>
+
+    <!-- AI CONTENT PANEL -->
+    <main class="flex-1 bg-black rounded-t-[32px] p-6 shadow-2xl overflow-y-auto border-t border-white/10">
+        <div id="content-area">
+            <h2 id="display-title" class="text-2xl font-bold mb-3">The Ancient Fossil</h2>
+            <div class="w-12 h-1 bg-blue-500 rounded-full mb-6"></div>
+            <p id="display-text" class="text-slate-300 leading-relaxed">
+                Hey there! Choose a persona above to begin. Our AI is ready to translate these ancient mysteries for you!
+            </p>
+        </div>
+        
+        <!-- Footer Info -->
+        <div class="mt-8 pt-8 border-t border-white/5 flex justify-between items-center opacity-50">
+            <span class="text-[10px] uppercase tracking-widest">FLL 2026 Project</span>
+            <span class="text-[10px] uppercase tracking-widest">UNEARTHED System v1</span>
+        </div>
+    </main>
+
+    <script>
+        // DATA OBJECT: Change this content for your fish artifact!
+        const artifactData = {
+            explorer: {
+                title: "The Underwater Time Traveler",
+                text: "Whoa! 🐟 You're looking at a fish that lived millions of years ago! It got trapped in the mud so fast that it turned into a rock. It's like a photo from the past, but you can touch it!"
+            },
+            scientist: {
+                title: "Specimen: Fossilized Actinopterygii",
+                text: "This fossil shows incredible preservation of the skeletal structure and fin rays. Based on the sediment layer where it was found, we can determine the pH and temperature of the water from millions of years ago."
+            },
+            novelist: {
+                title: "The Silent Swimmer",
+                text: "Imagine this creature darting through ancient currents, under a sun that looked different than ours today. It was frozen in time, a quiet witness to the rising and falling of mountains."
+            }
+        };
+
+        function updatePersona(type) {
+            const area = document.getElementById('content-area');
+            area.style.opacity = 0;
+
+            setTimeout(() => {
+                document.querySelectorAll('.persona-btn').forEach(btn => {
+                    btn.classList.remove('active', 'bg-blue-600');
+                    btn.classList.add('bg-slate-800');
+                });
+                const activeBtn = document.getElementById('btn-' + type);
+                activeBtn.classList.add('active', 'bg-blue-600');
+                activeBtn.classList.remove('bg-slate-800');
+
+                document.getElementById('display-title').innerText = artifactData[type].title;
+                document.getElementById('display-text').innerText = artifactData[type].text;
+                area.style.opacity = 1;
+            }, 200);
+        }
+
+        window.onload = () => updatePersona('explorer');
+    </script>
+</body>
+</html>
